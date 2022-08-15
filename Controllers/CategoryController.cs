@@ -11,54 +11,103 @@ namespace Blog.Controllers
         [HttpGet("v1/categories")]
         public async Task<IActionResult> GetAllAsync([FromServices] BlogDataContext context)
         {
-            return Ok(await context.Categories.ToListAsync());
+            try
+            {
+                return Ok(await context.Categories.ToListAsync());
+            }
+            catch (Exception)
+            {
+
+                return StatusCode(500, "500C1 - Falha interna no servidor");
+            }
+            
         }
+
         [HttpGet("v1/categories/{id:int}")]
         public async Task<IActionResult> GetByIdAsync([FromServices] BlogDataContext context,[FromRoute] int id)
         {
-            var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+            try
+            {
+                var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
 
-            if (category == null)  
-                return NotFound();
+                if (category == null)
+                    return NotFound();
 
-            return Ok(category);
+                return Ok(category);
+            }
+            catch (Exception)
+            {
+
+                return StatusCode(500, "500C2 - Falha interna no servidor");
+            }
+           
         }
 
         [HttpPost("v1/categories")]
         public async Task<IActionResult> PostAsync([FromServices] BlogDataContext context, [FromBody] Category model)
         {
-            await context.Categories.AddAsync(model);
-            await context.SaveChangesAsync();
 
-            return Created($"v1/categories/{model.Id}", model);
+            try
+            {
+                await context.Categories.AddAsync(model);
+                await context.SaveChangesAsync();
+
+                return Created($"v1/categories/{model.Id}", model);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Não foi possivel incluir a categoria");
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "500C3 - Falha interna no servidor");
+            }
+           
         }
 
         [HttpPut("v1/categories/{id:int}")]
         public async Task<IActionResult> PutAsync([FromServices] BlogDataContext context, [FromRoute] int id, [FromBody] Category model)
         {
-            var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
-            if(category == null)
-                return BadRequest();
+            try
+            {
+                var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+                if (category == null)
+                    return BadRequest();
 
-            category.Slug = model.Slug;
-            category.Name = model.Name; 
+                category.Slug = model.Slug;
+                category.Name = model.Name;
 
-            context.Categories.Update(category);
-            await context.SaveChangesAsync();
+                context.Categories.Update(category);
+                await context.SaveChangesAsync();
 
-            return Ok(model);
+                return Ok(model);
+            }
+            catch (Exception)
+            {
+
+                return StatusCode(500, "500C4 - Falha interna no servidor");
+            }
+            
         }
         [HttpDelete("v1/categories/{id:int}")]
         public async Task<IActionResult> DeleteAsync([FromServices] BlogDataContext context, [FromRoute] int id)
         {
-            var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
-            if (category == null)
-                return BadRequest();
+            try
+            {
+                var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+                if (category == null)
+                    return BadRequest();
 
-            context.Categories.Remove(category);
-            await context.SaveChangesAsync();
+                context.Categories.Remove(category);
+                await context.SaveChangesAsync();
 
-            return Ok(category);
+                return Ok(category);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "500C5 - Falha interna no servidor");
+            }
+            
         }
     }
 }
