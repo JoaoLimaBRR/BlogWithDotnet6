@@ -14,14 +14,12 @@ namespace Blog.Controllers
         {
             try
             {
-                return Ok(await context.Categories.ToListAsync());
+                return Ok(new ResultViewModel<List<Category>>(context.Categories.ToList()));
             }
             catch (Exception)
             {
-
-                return StatusCode(500, "500C1 - Falha interna no servidor");
+                return StatusCode(500, new ResultViewModel<Category>("500C1 - Falha interna no servidor"));
             }
-            
         }
 
         [HttpGet("v1/categories/{id:int}")]
@@ -32,14 +30,14 @@ namespace Blog.Controllers
                 var category = await context.Categories.FirstOrDefaultAsync(x => x.Id == id);
 
                 if (category == null)
-                    return NotFound();
+                    return NotFound(new ResultViewModel<Category>("Categoria não encontrada"));
 
-                return Ok(category);
+                return Ok(new ResultViewModel<Category>(category));
             }
             catch (Exception)
             {
 
-                return StatusCode(500, "500C2 - Falha interna no servidor");
+                return StatusCode(500, new ResultViewModel<Category>("500C2 - Falha interna no servidor"));
             }
            
         }
@@ -47,6 +45,8 @@ namespace Blog.Controllers
         [HttpPost("v1/categories")]
         public async Task<IActionResult> PostAsync([FromServices] BlogDataContext context, [FromBody] EditorCategoryViewModel model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest();   
 
             try
             {
