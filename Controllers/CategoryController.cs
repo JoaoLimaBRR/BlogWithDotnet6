@@ -56,11 +56,11 @@ namespace Blog.Controllers
             }
             catch (DbUpdateException)
             {
-                return StatusCode(500, "Não foi possivel incluir a categoria");
+                return StatusCode(500, "500C3 - Não foi possivel incluir a categoria");
             }
             catch (Exception)
             {
-                return StatusCode(500, "500C3 - Falha interna no servidor");
+                return StatusCode(500, "500C4 - Falha interna no servidor");
             }
            
         }
@@ -80,14 +80,17 @@ namespace Blog.Controllers
                 context.Categories.Update(category);
                 await context.SaveChangesAsync();
 
-                return Ok(model);
+                return Ok(category);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "500C5 -Não foi possivel incluir a categoria");
             }
             catch (Exception)
             {
-
-                return StatusCode(500, "500C4 - Falha interna no servidor");
+                return StatusCode(500, "500C6 - Falha interna no servidor");
             }
-            
+
         }
         [HttpDelete("v1/categories/{id:int}")]
         public async Task<IActionResult> DeleteAsync([FromServices] BlogDataContext context, [FromRoute] int id)
@@ -103,11 +106,15 @@ namespace Blog.Controllers
 
                 return Ok(category);
             }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "500C7 - Não foi possivel incluir a categoria");
+            }
             catch (Exception)
             {
-                return StatusCode(500, "500C5 - Falha interna no servidor");
+                return StatusCode(500, "500C8 - Falha interna no servidor");
             }
-            
+
         }
     }
 }
