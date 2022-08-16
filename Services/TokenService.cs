@@ -1,4 +1,5 @@
-﻿using Blog.Models;
+﻿using Blog.Extensions;
+using Blog.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,18 +12,15 @@ namespace Blog.Services
         public string GenerateToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
+            //captura todas as permissoes do usuario
+            var claims = user.GetClaims();
             //transforma para bytes a key criada na classe de configuration
             var key = Encoding.ASCII.GetBytes(Configuration.JwtKey);
             //configura como o token ira se comportar
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(
-                    new Claim[]
-                    {
-                        new Claim(ClaimTypes.Name, "Joao"), //User.Identity.Name
-                        new Claim(ClaimTypes.Role, "admin"),
-                        new Claim(ClaimTypes.Role, "user")//User.IsInRole
-                    }),
+                //passa para o gerador de tokens as permissoes do usuario
+                Subject = new ClaimsIdentity(claims),
                 //expira em 8 horas
                 Expires = DateTime.UtcNow.AddHours(8),
 
