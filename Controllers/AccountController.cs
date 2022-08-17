@@ -89,12 +89,12 @@ namespace Blog.Controllers
                 return StatusCode(500, new ResultViewModel<string>("403A - Falha interna no servidor"));
             }
         }
-
-        [Authorize]
+        
         [HttpPost("v1/accounts/upload-image")]
+        [Authorize]
         public async Task<IActionResult> UploadImage([FromBody] UploadImageViewModel uploadImage, [FromServices] BlogDataContext dbContext)
         {
-            var fileName = $"{Guid.NewGuid().ToString()}.jpg";
+            var fileName = $"{Guid.NewGuid()}.jpg";
             var data = new Regex(@"^data:image\/[a-z]+;base64,").Replace(uploadImage.Base64Image, "");
             var bytes = Convert.FromBase64String(data);
 

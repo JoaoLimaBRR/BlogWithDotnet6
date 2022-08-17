@@ -3,6 +3,7 @@ using Blog.Extensions;
 using Blog.Models;
 using Blog.ViewModels;
 using Blog.ViewModels.Categories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,7 +44,6 @@ namespace Blog.Controllers
             }
 
         }
-
         [HttpPost("v1/categories")]
         public async Task<IActionResult> PostAsync([FromServices] BlogDataContext context, [FromBody] EditorCategoryViewModel model)
         {

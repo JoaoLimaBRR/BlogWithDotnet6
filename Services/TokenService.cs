@@ -12,10 +12,10 @@ namespace Blog.Services
         public string GenerateToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            //captura todas as permissoes do usuario
-            var claims = user.GetClaims();
             //transforma para bytes a key criada na classe de configuration
             var key = Encoding.ASCII.GetBytes(Configuration.JwtKey);
+            //captura todas as permissoes do usuario
+            var claims = user.GetClaims();
             //configura como o token ira se comportar
             var tokenDescriptor = new SecurityTokenDescriptor
             {

@@ -7,13 +7,11 @@ using System.Text;
 using static Blog.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
-
 ConfigureAuthentication(builder);
 ConfigureMvc(builder);
 ConfigureServices(builder);
 
 var app = builder.Build();
-
 LoadConfiguration(app);
 
 //configura o uso de autenticação e autorização, sempre na order autenticação => autorização
@@ -22,7 +20,6 @@ app.UseAuthorization();
 //arquivos estaticos ---> wwwrot
 app.UseStaticFiles();
 app.MapControllers();
-
 app.Run();
 
 void LoadConfiguration(WebApplication app)
@@ -35,9 +32,9 @@ void LoadConfiguration(WebApplication app)
     app.Configuration.GetSection("smtp").Bind(smtp);
     Configuration.smtpConfiguration = smtp;
 }
-void ConfigureAuthentication(WebApplicationBuilder builder) {
+void ConfigureAuthentication(WebApplicationBuilder builder)
+{
     var key = Encoding.ASCII.GetBytes(Configuration.JwtKey);
-    //configurar autenticação
     builder.Services.AddAuthentication(x =>
     {
         x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -65,9 +62,8 @@ void ConfigureMvc(WebApplicationBuilder builder)
           });
 }
 void ConfigureServices(WebApplicationBuilder builder)
-{
+{//injeção de dependencia
     builder.Services.AddDbContext<BlogDataContext>();
-    //injeção de dependencia
     builder.Services.AddTransient<TokenService>();
     builder.Services.AddTransient<EmailService>();
 }
