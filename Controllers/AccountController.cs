@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 
 namespace Blog.Controllers
 {
+    [ApiController]
     public class AccountController : ControllerBase
     {
         private readonly TokenService _tokenService;
@@ -89,9 +90,8 @@ namespace Blog.Controllers
                 return StatusCode(500, new ResultViewModel<string>("403A - Falha interna no servidor"));
             }
         }
-        
-        [HttpPost("v1/accounts/upload-image")]
         [Authorize]
+        [HttpPost("v1/accounts/upload-image")]
         public async Task<IActionResult> UploadImage([FromBody] UploadImageViewModel uploadImage, [FromServices] BlogDataContext dbContext)
         {
             var fileName = $"{Guid.NewGuid()}.jpg";
@@ -114,7 +114,7 @@ namespace Blog.Controllers
             if (user == null)
                 return NotFound(new ResultViewModel<string>("Usuário não encontrado"));
 
-            user.Image = $"https://localhost:7123/images/{fileName}";
+            user.Image = $"https://localhost:7231/images/{fileName}";
 
             try
             {

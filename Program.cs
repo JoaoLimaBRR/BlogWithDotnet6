@@ -11,14 +11,16 @@ ConfigureAuthentication(builder);
 ConfigureMvc(builder);
 ConfigureServices(builder);
 
-var app = builder.Build();
-LoadConfiguration(app);
 
+var app = builder.Build();
 //configura o uso de autenticação e autorização, sempre na order autenticação => autorização
+
+LoadConfiguration(app);
+////arquivos estaticos ---> wwwrot
+//app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
-//arquivos estaticos ---> wwwrot
-app.UseStaticFiles();
+
 app.MapControllers();
 app.Run();
 
