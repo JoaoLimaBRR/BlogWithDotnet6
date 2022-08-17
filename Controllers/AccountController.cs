@@ -4,15 +4,17 @@ using Blog.Models;
 using Blog.Services;
 using Blog.ViewModels;
 using Blog.ViewModels.Accounts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SecureIdentity.Password;
+using System.Text.RegularExpressions;
 
 namespace Blog.Controllers
 {
     public class AccountController : ControllerBase
     {
-        private readonly TokenService _tokenService;  
+        private readonly TokenService _tokenService;
         private readonly EmailService _emailService;
         public AccountController(TokenService tokenService, EmailService emailService)
         {
@@ -61,7 +63,7 @@ namespace Blog.Controllers
         }
 
         [HttpPost("v1/login")]
-        public async Task<IActionResult> Login([FromBody]LoginViewModel login, [FromServices] BlogDataContext dbContext)
+        public async Task<IActionResult> Login([FromBody] LoginViewModel login, [FromServices] BlogDataContext dbContext)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ResultViewModel<string>(ModelState.GetErrors()));
@@ -75,7 +77,7 @@ namespace Blog.Controllers
             if (user == null)
                 return StatusCode(401, new ResultViewModel<string>("Usuário ou senha invalidas"));
 
-            if(!PasswordHasher.Verify(user.PasswordHash, login.Password))
+            if (!PasswordHasher.Verify(user.PasswordHash, login.Password))
                 return StatusCode(401, new ResultViewModel<string>("Usuário ou senha invalidas"));
             try
             {
@@ -87,5 +89,47 @@ namespace Blog.Controllers
                 return StatusCode(500, new ResultViewModel<string>("403A - Falha interna no servidor"));
             }
         }
+
+        [Authorize]
+        [HttpPost("v1/accounts/upload-image")]
+        public async Task<IActionResult> UploadImage([FromBody] UploadImageViewModel uploadImage, [FromServices] BlogDataContext dbContext)
+        {
+            var fileName = $"{Guid.NewGuid().ToString()}.jpg";
+            var data = new Regex(@"^data:image\/[a-z]+;base64,").Replace(uploadImage.Base64Image, "");
+            var bytes = Convert.FromBase64String(data);
+
+            try
+            {
+                await System.IO.File.WriteAllBytesAsync($"wwwroot/images/{fileName}", bytes);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ResultViewModel<string>("404A - Falha interna no servidor"));
+            }
+
+            var user = await dbContext
+                .Users
+                .FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
+
+            if (user == null)
+                return NotFound(new ResultViewModel<string>("Usuário não encontrado"));
+
+            user.Image = $"https://localhost:7123/images/{fileName}";
+
+            try
+            {
+                dbContext.Update(user);
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ResultViewModel<string>("405A - Falha interna no servidor"));
+            }
+
+            return Ok(new ResultViewModel<string>("Imagem alterada com sucesso", null));
+
+        }
+
+
     }
 }
