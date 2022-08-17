@@ -3,6 +3,7 @@ using Blog.Extensions;
 using Blog.Models;
 using Blog.Services;
 using Blog.ViewModels;
+using Blog.ViewModels.Accounts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SecureIdentity.Password;
@@ -11,10 +12,12 @@ namespace Blog.Controllers
 {
     public class AccountController : ControllerBase
     {
-        private readonly TokenService _tokenService;    
-        public AccountController(TokenService tokenService)
+        private readonly TokenService _tokenService;  
+        private readonly EmailService _emailService;
+        public AccountController(TokenService tokenService, EmailService emailService)
         {
-            _tokenService = tokenService;   
+            _tokenService = tokenService;
+            _emailService = emailService;
         }
 
         [HttpPost("v1/accounts/")]
@@ -31,10 +34,13 @@ namespace Blog.Controllers
                 Slug = user.Email.Replace("@", "-").Replace(".", "-"),
                 PasswordHash = PasswordHasher.Hash(pass)
             };
+
             try
             {
                 await dataContext.Users.AddAsync(userCreated);
                 await dataContext.SaveChangesAsync();
+
+                _emailService.Send(user.Name, user.Email, "Bem vindo ao blog", $"Sua senha é <strong>{pass}</strong>");
 
                 return Created($"v1/accounts/{userCreated.Id}", new ResultViewModel<dynamic>(new
                 {

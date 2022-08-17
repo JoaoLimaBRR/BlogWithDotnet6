@@ -19,6 +19,8 @@ LoadConfiguration(app);
 //configura o uso de autenticação e autorização, sempre na order autenticação => autorização
 app.UseAuthentication();
 app.UseAuthorization();
+//arquivos estaticos ---> wwwrot
+app.UseStaticFiles();
 app.MapControllers();
 
 app.Run();
@@ -67,4 +69,5 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddDbContext<BlogDataContext>();
     //injeção de dependencia
     builder.Services.AddTransient<TokenService>();
+    builder.Services.AddTransient<EmailService>();
 }
