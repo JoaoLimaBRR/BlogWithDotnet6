@@ -1,4 +1,5 @@
 ﻿using Blog.Data;
+using Blog.Models;
 using Blog.ViewModels;
 using Blog.ViewModels.Posts;
 using Microsoft.AspNetCore.Mvc;
@@ -46,13 +47,36 @@ namespace Blog.Controllers
                         postList
                     }
                     ));
-
-
             }
             catch (Exception)
             {
 
                 return StatusCode(500, new ResultViewModel<string>("500P1 - Falha interna no servidor"));
+            }
+
+        }
+
+        [HttpGet("v1/posts/{id:int}")]
+        public async Task<IActionResult> GetByIdAsync([FromServices] BlogDataContext dbContext, [FromRoute] int id)
+        {
+            try
+            {
+                var post = await dbContext
+                                .Posts
+                                .AsNoTracking()
+                                .Include(x => x.Author)
+                                    .ThenInclude(x => x.Roles)
+                                .Include(x => x.Category)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (post == null)
+                    return NotFound(new ResultViewModel<string>("Post não encontrado"));
+
+                return Ok(new ResultViewModel<Post>(post));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ResultViewModel<string>("500P2 - Falha interna no servidor"));
             }
 
         }
