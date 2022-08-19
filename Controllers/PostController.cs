@@ -80,5 +80,47 @@ namespace Blog.Controllers
             }
 
         }
+
+        [HttpGet("v1/posts/category/{category}")]
+        public async Task<IActionResult> GetByCategory([FromServices] BlogDataContext dbContext, [FromRoute] string category,
+                                                       [FromQuery] int pageSize = 25, [FromQuery] int page = 0)
+        {
+            try
+            {
+                var posts = await dbContext
+                                .Posts
+                                .AsNoTracking()
+                                .Include(x => x.Category)
+                                //pula a quantidade de casas passadas por parametro
+                                .Skip(page * pageSize)
+                                //pega uma quantidade de registro passada por parametro
+                                .Take(pageSize)
+                                .Where(x => x.Category.Name == category)
+                                .ToListAsync();
+
+                var listSize = await dbContext
+                    .Posts
+                    .AsNoTracking()
+                    .Include(x => x.Category)
+                    .Where(x => x.Category.Name == category)
+                    .CountAsync();
+
+                return Ok(new ResultViewModel<dynamic>
+                    (new
+                    {
+                        listSize,
+                        page,
+                        pageSize,
+                        posts
+                    }
+                    ));
+            }
+            catch (Exception)
+            {
+
+                return StatusCode(500, new ResultViewModel<string>("500P1 - Falha interna no servidor"));
+            }
+
+        }
     }
 }
