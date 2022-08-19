@@ -6,18 +6,32 @@ using Blog.ViewModels.Categories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Blog.Controllers
 {
     [ApiController]
     public class CategoryController : ControllerBase
     {
+
+        private readonly IMemoryCache _memoryCache;
+
+        public CategoryController(IMemoryCache memoryCache)
+        {
+            _memoryCache = memoryCache;
+        }
+
         [HttpGet("v1/categories")]
         public async Task<IActionResult> GetAllAsync([FromServices] BlogDataContext context)
         {
             try
             {
-                return Ok(new ResultViewModel<List<Category>>(context.Categories.ToList()));
+                var categories = await _memoryCache.GetOrCreateAsync("CategoriesCache", entry => {
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                    return context.Categories.ToListAsync();
+                });
+
+                return Ok(new ResultViewModel<List<Category>>(categories));
             }
             catch (Exception)
             {
