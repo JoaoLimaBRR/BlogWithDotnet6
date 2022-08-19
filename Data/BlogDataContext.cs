@@ -13,7 +13,7 @@ namespace Blog.Data
         public DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlServer("Server=DESKTOP-JOAO;Database=master;Persist Security Info=False;User Id=ADMIN;Password=12345;Encrypt=False;");
+            => options.UseSqlServer("Server=DESKTOP-JOAO;Initial Catalog=blog-modulo-6;Integrated Security=True;Persist Security Info=False;Encrypt=False;");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
